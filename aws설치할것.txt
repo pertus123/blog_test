@@ -1,0 +1,78 @@
+pem 파일 접속
+
+ssh -i I4B103T.pem ubuntu@i4b103.p.ssafy.io
+ssh -i I4B103T.pem ubuntu@3.36.125.70 -> 우선 이걸로
+-----
+=0. apt-get 업데이트
+sudo apt-get update
+sudo apt-get upgrade
+
+=1. git 설치 java 설치.  maven 설치
+sudo apt-get install git mvn java-1.8.0-openjdk-devel.x86_64
+
+=2. nginx 설치
+sudo apt-get install nginx
+-> nginx 셋팅
+
+
+3. mariadb 설치
+sudo apt update && sudo apt-get -y upgrade
+sudo apt-get install -y mariadb-server
+mysql -u root -p
+
+db 다 셋팅한 후 - 여기부터 다시	완
+밀어 넣기 성공.
+
+이제 db 수정 해야함 -여기부터
+로컬과 연결하기 위해서
+vi /etc/mysql/mariadb.conf.d/50-server.cnf
+에서 bind-adress 0.0.0.0으로 설정
+
+user
+ssafy103!
+localhost와 % 두개 만듬
+create user user@localhost identified by ssafy103!;
+create user user@'%' identified by ssafy103!;
+권한 추가
+grant all privileges on *.* to user@'%' identified by 'ssafy103!' with grant option;
+grant all privileges on *.* to user@localhost identified by 'ssafy103!' with grant option;
+
+service mysql restart
+
+local에서 연결. host 등 입력
+
+
+
+mysqld --verbose --help | grep -A 1 'Default options'
+/etc/mysql/my.cnf
+
+//[client] default-character-set = utf8mb4 [mysql] default-character-set = utf8mb4 [mysqld] character-set-server = utf8mb4 collation-server = utf8mb4_unicode_ci
+//출처: https://88oy.tistory.com/435 [팔팔청춘]
+
+계정 생성 및 권한 넣기
+
+db 밀어 넣기
+
+ - 4. npm 설치 + quasar
+sudo apt-get
+https://snowdeer.github.io/mac-os/2019/02/01/how-to-install-npm-on-ubuntu-18p04/
+
+
+
+
+db 이모티콘 셋팅
+db 접속 및 로컬 연결
+db id = user 
+password 는 ssafy103
+날짜 셋팅
+?characterEncoding=UTF-8&serverTimezone=UTC
+출처: https://devuna.tistory.com/47 [튜나 개발일기📚]
+
+백엔드 프론트 최우선 배포
+
+---
+태그 구현
+course 검토
+aws 발급 받으면 셋팅
+DB 다시 정리
+

@@ -1,0 +1,300 @@
+package com.common.project.controller;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.common.project.dao.CourseDao;
+import com.common.project.model.course.CardList;
+import com.common.project.model.course.CourseInfo;
+import com.common.project.model.course.CourseInfoClass;
+import com.common.project.model.course.InflearnTotalList;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@RestController
+@Transactional
+@Api(tags = "CourseController", description = "강의관련 API")
+public class CourseController {
+
+	@Autowired
+	 CourseDao courseDao;
+	
+	
+//	1. 프로필 들어오면 수강하는 강의가 카드 리스트들로 보인다. 카드 세션에는 수강하는 사진, 강의 제목, 등등이 노출된다.
+//	=> user_course에서 uid로 현재 있는 gid의 정보들을 course_info와 조회하여
+//	정보들을 같이 조회한다.
+
+	@GetMapping("/course/cardlist")
+	@ApiOperation(value = "첫 프로필 화면 수강 강의 카드 리스트")
+	public Object courseCardList(Long uid) {
+		// uid로 조회해서 해당하는 gid의 값들을 가져온다.
+		Optional<List<CardList>> cardList  = courseDao.findUserInfoCourseByUid(uid);
+		//List<CardList> cardListResult = cardList.get();
+		if(cardList.isPresent()) {
+			Collections.reverse(cardList.get()); // 역, 만들어진 최신 순
+			return new ResponseEntity<>(cardList, HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>("", HttpStatus.NOT_ACCEPTABLE);
+		}
+	}
+	
+//	+를 눌러서 새로운 강의를 생성한다.
+//	1. 강의를 가져올 플랫폼을 선택 후, 해당 강의 제목을 검색한다.
+//	=> 1)인프런 선택시, 인프런 토탈 리스트에서 모든 제목 정보를 보내준다. - 뷰에서 드롭다운으로 노출
+	@GetMapping("/course/keywordList")
+	@ApiOperation(value = "해당 강의 전체 조회 check는 과목 선택 = 인프런은 1번으로")
+	public Object keywordList(int coursetype) {
+			Optional<List<String>> keywords = courseDao.findByAllCourseKeywordList(coursetype);
+			if (keywords.isPresent())
+				return new ResponseEntity<>(keywords, HttpStatus.OK);// 존재하면
+			else
+				return new ResponseEntity<>("", HttpStatus.OK);// 없으면
+	}
+	
+	
+	2. 해당 강의가 이미 만들어져 있을 경우, x, 없으면 만들고(게시글까지) 기존 화면에서 갱신.
+	=>1)강의 제목으로 생성할 때, 현재 내 수강 리스트에 있는지 없는지 체크를핸다.
+	1.1)문자열 기준으로 course_info에 gid가 없다면 새로 생성을 한다.
+	타입과 제목을 통해 inflearn_total_list에서 정보를 가져온 후, course_info에 생성한다음,
+	해당 url을 클로링하여 course_info_class에 생성을 해준다.대 중 분류.
+	그리고  user_course에 uid와 해당 gid 정보로 생성을 한다.
+	1.2)ci에 gid가 있다면, user_course를 uid와 gid통해 조회한다. 있으면 생성 X
+	만약 없다면, 하나 gid로 만들어준다. 그리고 생성을 한다.
+	1.2.1)course_list에 uid, gid, 가 생성되며 해당 gid의 course_info_class 정보들이 들어가진다.
+	1.2.2)그리고 course_post에 middlecategory(제목)을 통한 게시글이 만들어진다. 
+	
+/* 크롤링 파트*/
+
+public void inflearnCrawling(Long gid,String url) {
+	Document doc = null;
+	try {
+		doc = Jsoup.connect(url).get();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+
+	Elements element = doc.select("div.cd-accordion__section-cover");
+	Iterator<Element> ie1 = element.select("span.cd-accordion__section-title").iterator();
+
+	int cnt = 0;
+		while(ie1.hasNext()) {
+			//System.out.println(ie1.next().text());
+			String bigClass = ie1.next().text();
+			Iterator<Element> ie2 = element.get(cnt++).select("span.ac-accordion__unit-title").iterator();
+			while(ie2.hasNext()) {
+				//System.out.println(ie2.next().text());
+				courseDao.insertCourseInfoClass(gid,bigClass, ie2.next().text());
+			}
+		}
+}
+	
+	
+	@GetMapping("/course/crateCourse")
+	@ApiOperation(value = "검색한 키워드로 강의를 생성한다.")
+	public Object crateCourse(Long uid, int coursetype, String keyword) {
+		//=>1)강의 제목으로 생성할 때, 현재 내 수강 리스트에 있는지 없는지 체크를핸다.
+		// 내 수강 리스트와 inflearn(먼저) 수강리스트 바교
+		// 전체 수강리스트에서 해당 키워드가 있는지 체크
+		Optional<InflearnTotalList> isKeyword = courseDao.findByAllCourseKeyword(coursetype, keyword);
+		
+		if(!isKeyword.isPresent()) {
+			// 해당 키워드가 전체 수강 목록에 없다면 글을 잘못 입력한것
+			return new ResponseEntity<>("success", HttpStatus.NOT_ACCEPTABLE);
+		}
+		
+		//  내 수강 리스트에 있는지 체크.
+		//isKeyword = null;
+		Optional<String> myIsKeyword = courseDao.findByMyCourseKeyword(uid, coursetype, keyword);
+		if(myIsKeyword.isPresent()) {
+			// 현재 수강 목록에 있는것 . 생성 불가
+			return new ResponseEntity<>("success", HttpStatus.NOT_ACCEPTABLE);
+		}
+		
+		// 이제 생성가능한데
+		Optional<CourseInfo> courseInfo = courseDao.findByCourseAndCoursetype(keyword, coursetype);
+		
+		if(!courseInfo.isPresent()) { // 만약에 courseinfo에도 없으면. 크롤링~
+			//인프런토탈리스트에서 타입과 맞는 course를 찾고, course_info에 넣는다. 그리고 그것의 url을 통해서 course info class 에 정보를 넣는다.
+			// 새로 저장했고, 
+			CourseInfo courseinfo = courseDao.save(new CourseInfo(isKeyword.get().getCoursetype(), isKeyword.get().getCourse(), isKeyword.get().getCourseurl(), isKeyword.get().getImageurl(), isKeyword.get().getInstructor()));
+			// course info class 에 저장한다.
+			// 크롤링 ㄱㄱ
+			inflearnCrawling(courseinfo.getGid(), courseinfo.getCourseurl());
+		}
+		
+		// 있으면 그걸로 생성 // 연결시켜준다. 생성. uid gid 부분에. 그리고 해당 페이지를 생성한다.?
+		//일단 gid를 찾느다.
+		CourseInfo courseinfo = courseDao.findByCoursetypeAndCourse(coursetype, keyword);
+		
+		// 그리고 user_courseㅇ에 저장을 한다.
+		courseDao.saveUserCourseByUidAndGid(uid, courseinfo.getGid()); // optional이나 중복체크 안해도 되겠지?
+		
+		// 이제 페이지를 생성해야한다 ㅅㅂ
+		//	1.2.2)그리고 course_post에 middlecategory(제목)을 통한 게시글이 만들어진다. 
+		
+		List<CourseInfoClass> courseInfoClass = courseDao.findCourseInfoClassByGid(courseinfo.getGid());
+		
+		//이메일 정보.
+		String email = courseDao.findMemberByEmail(uid);
+		// 이제 각 페이지 생성.
+		for(int i = 0; i < courseInfoClass.size(); i++) {
+			courseDao.saveCourseClassPage(courseinfo.getGid(), uid, courseInfoClass.get(i).getManicategory(),courseInfoClass.get(i).getMiddlecategory(), email);
+		}
+		//끝인가
+		
+		
+		
+		// uid로 조회해서 해당하는 gid의 값들을 가져온다.
+		Optional<List<CardList>> cardList  = courseDao.findUserInfoCourseByUid(uid);
+		//List<CardList> cardListResult = cardList.get();
+		if(cardList.isPresent()) {
+			Collections.reverse(cardList.get());
+			return new ResponseEntity<>(cardList, HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>("success", HttpStatus.NOT_ACCEPTABLE);
+		}
+	}
+
+
+	강의를 본다.
+	1. 카드 세션을 클릭했을 때, 해당 강의의 리스트가 출력된다.
+	=> course_list를 통해 전체 리스트가 생성된다.
+	리스트 안에 리스트 넣어서 보내준다. 알아서 꺼내 써라
+
+	2. 리스트는 대분류와 중분류로 나눠지며, 중분류를 클릭한 경우, 해당 게시글로 넘어가진다. 
+	=> gid, uid, maincategory, middlecategory를 보내서 course_post의 해당 페이지가 보이게 한다.
+	3. 게시글은 상세보기 형태로 넘어가지며, 거기서 수정을 통해 강의를 작성한다.
+
+	강의를 삭제한다.
+	1. 카드리스트에서 삭제를 한다. -> 종속된것 전체 삭제 이건 나중에
+
+	// course_info 와 class간의 연결은 필요가 없는건가? - 생각
+	// 강의 조회
+//	@GetMapping("/course/Search")
+//	@ApiOperation(value = "해당 강의 전체 조회 check는 과목 선택 = 인프런은 1번으로")
+//	public Object courseSearch(Long check) {
+//		if (check == 1) {
+//			Optional<List<String>> keywords = courseDao.findInflearnByAllCourse();
+//			if (keywords.isPresent())
+//				return new ResponseEntity<>(keywords, HttpStatus.OK);// 존재하면
+//			else
+//				return new ResponseEntity<>("", HttpStatus.OK);// 없으면
+//		}
+//		return new ResponseEntity<>("success", HttpStatus.OK);
+//	}
+	
+
+//	// 강의 조회
+//	@GetMapping("/course/Search")
+//	@ApiOperation(value = "해당 강의 전체 조회 check는 과목 선택 = 인프런은 1번으로")
+//	public Object courseSearch(Long check) {
+//		if (check == 1) {
+//			Optional<List<String>> keywords = courseDao.findInflearnByAllCourse();
+//			if (keywords.isPresent())
+//				return new ResponseEntity<>(keywords, HttpStatus.OK);// 존재하면
+//			else
+//				return new ResponseEntity<>("", HttpStatus.OK);// 없으면
+//		}
+//		return new ResponseEntity<>("success", HttpStatus.OK);
+//	}
+//
+//	// 강의 생성. 선택시.
+//	@GetMapping("/course/create")
+//	@ApiOperation(value = "강의 생성 check는 과목 선택 = 인프런은 1번으로")
+//	public Object courseCreate(Long uid, Long check, String courseName) {
+//		// 1번은 인프런, 일단은 인프론만 가정하여 진행
+//		
+//		//기존 db에 있는건지 없는건지 파악해야함.
+//
+//		// 모든 정보를 가져옴.
+//		Optional<List<InflearnTotalList>> isInflearnTotalList = courseDao.findByCourse(courseName);
+//		if (!isInflearnTotalList.isPresent()) { // 비어있으면
+//			return new ResponseEntity<>("fail", HttpStatus.NOT_ACCEPTABLE);
+//		}
+//		
+//		// 값이 존재한다면
+//		InflearnTotalList inflearnTotalList = isInflearnTotalList.get().get(0);
+//		
+//		// url 정보로 크롤링 검색
+//		String url = inflearnTotalList.getCourseurl();
+//		Document doc = null;
+//		try {
+//			doc = Jsoup.connect(url).get();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//
+//		Elements element = doc.select("div.cd-accordion__section-cover");
+//		Iterator<Element> ie1 = element.select("span.cd-accordion__section-title").iterator();
+//
+//		int cnt = 0;
+//		while (ie1.hasNext()) {
+//			System.out.println(ie1.next().text()); // 큰 거 
+//			Iterator<Element> ie2 = element.get(cnt++).select("span.ac-accordion__unit-title").iterator();
+//			while (ie2.hasNext()) {
+//				System.out.println(ie2.next().text()); // 작은 거
+//			}
+//		}
+//		
+//
+//		// 내 프로필에서만, 강의 목록의 내용이 전체 공개인지, 혼자 공개인지 정해야함.
+//
+//		return new ResponseEntity<>("success", HttpStatus.OK);
+//	}
+
+	
+	
+	
+	
+
+	
+	///////////// DB에 넣을 인프런 전체 강의 목록가져오기 -> 1회 -> 나중에 주 1회 등.
+	/*
+	@GetMapping("/course/inflearn")
+	@ApiOperation(value = "댓글수정")
+	public Object inflearnTotalSave() {
+		courseDao.deleteInflearnAll();
+		String base_url = "https://www.inflearn.com/courses?order=seq&page=";
+
+		for (int i = 1; i <= 50; i++) {
+			String url = base_url + i;
+			Document doc = null;
+			try {
+				doc = Jsoup.connect(url).get();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			Elements element = doc.select("div.courses_card_list_body");
+			Iterator<Element> ie1 = element.select("div.course_title").iterator(); // 강의 이름
+			Iterator<Element> ieUrl = element.select("a.course_card_front").iterator();// 강의 url
+			Iterator<Element> ieImgUrl = element.select("img.swiper-lazy").iterator(); // 강의 이미지 url
+			Iterator<Element> ieInstructor = element.select("div.instructor").iterator(); // 강사이름
+			while (ie1.hasNext()) {
+				courseDao.insertInflearn(1, ie1.next().text(), "https://www.inflearn.com" + ieUrl.next().attr("href"), ieImgUrl.next().attr("src"), ieInstructor.next().text());
+			}
+		}
+		return new ResponseEntity<>("success", HttpStatus.OK);
+	}
+	*/
+}

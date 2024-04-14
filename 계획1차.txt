@@ -1,0 +1,134 @@
+:q
+
+
+서버
+server.port=8080
+server.servlet.context-path=/
+
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/common
+spring.datasource.username=user
+spring.datasource.password=user
+
+지금 가능한 것은 MemberController의 login, signup, deleteInfo 
+이렇게 3개 api가 사용 가능해요.
+
+
+아직 DㅍB 설계나 RESTAPI 설계가 제대로 끝나지 않아서 백엔드 개발이 본격적으로 하고 있지 않아서, 프론트 개발에 차질없게 임시적으로 만든거에요!
+
+그래도 저 3개의 api는 주소는 바뀔 수 있어도, api가 들어가는 입력, 내보내는 값 출력부분은 안바뀔꺼에요.
+
+간단하게 구현한 거라 아직 회원가입 중복 등 에러 처리는 하지 못했습니다. 
+
+1. 서버 연동 - 니가
+2. restAPI
+3. 스프링 크롤링
+4. 오늘 로그인 기능
+
+
+
+
+지금 가능한 것은 MemberController의 login, signup, deleteInfo 이렇게 3개 api가 사용 가능해요.
+아직 DB 설계나 RESTAPI 설계가 제대로 끝나지 않아서 백엔드 개발이 본격적으로 하고 있지 않아서, 프론트 개발에 차질없게 임시적으로 만든거에요!
+우리님 요청으로 일단 빠르게 만들었는데 형에게 전파가 조금 늦은거 같네요 ㅠㅠ 서버는 계속 켜놓을테니, 내일 여기서 더 테스트 하시면 되고 기능 더 넣어서 내일 다시 배포할께요!
+  혹시나 swagger 보는 방법이라던가 DB를 직접 보고싶으시면 말씀해주세요!
+
+그래도 저 3개의 api는 주소는 바뀔 수 있어도, api가 들어가는 입력, 내보내는 값 출력부분은 안바뀔꺼에요.
+
+간단하게 구현한 거라 아직 회원가입 중복 등 에러 처리는 하지 못했습니다.  혹시나 swagger 보는 방법이라던가 DB를 직접 보고싶으시면 말씀해주세요!
+
+소셜 로그인
+jpa강의
+시큐리티 sql
+restapi
+
+근데 이메일은 dsfsd@dsfd.com 라서 애매..
+성공하면 성공
+그외 오류가 발생하면?
+
+commentController
+delete	cmt/delete/{cid}
+get	cmt/detail/{pid}
+post	cmt/update
+post	cmt/write
+
+member - 1차 완
+delete 	user/delete/{uid} 삭제하기
+5. 현재 uid를 통해 탈퇴를 한다.
+
+post 	user/login
+2,회원가입한 정보로 로그인을 요청한다. 
+아이디 비밀번호가 일치하지 않는다면?
+
+get 	user/profile/{uid}
+3. 사용자의 uid를 통해 프로필을 본다.(클릭)
+
+post	user/signup
+1. 회원가입 눌러서 정보를 보내, 완료한다.
+근데 이메일 중복이 있다면?
+
+post	user/updateInfo
+4. 사용자의 정보를 수정한다. 
+
+
+post
+delete	notice/delete/{pid}
+6. 게시판을 삭제한다..
+get	notice/{pid} 			//	notice/{uid}/{pid} //상세페이지
+2. 그 글의 상세 페이지로 넘어간다. 
+post	notice/like/{sw}
+3. sw가 1이면, 좋아용, 0이면 싫어용(취소) => lpost_like와 연결
+get	notice/search // 인기, 최신, 기본도 이걸로
+1. 게시글을 검색한다. 여기에 들어갈 값은 search, sw로 이뤄지며 sw는 인기 최신 등을 나타냄.
+
+post	notice/update
+5. 글을 수정한다.
+
+post	notice/write
+4. 글을 쓴다.
+
+TempPost
+delete	temp/notice/delete/{tid}
+get	temp/notice/detail/{tid}
+post	temp/notice/save
+post	temp/notice/write
+
+like
+
+post_like는 좋아요 기능!
+원래 post 테이블에서 likes 속성으로만 눌리면 눌리면 1씩 증가시킬려고 했는데 
+현재 사용자가 이미 좋아요를 눌렀는지 안눌렀는지 몰라서(로그아웃하면vuex가 초기화) 각맴버들이 게시글마다 좋아요를 눌린거나 안눌린거 확인용으로 만든거야
+pid하고 uid 외래키로 게시글 정보가져오고, switch가 1이면 눌린 것, 0이면 안눌린 것으로 판별.
+
+post tag와 tag는 해시태그를 구현하기위해 만든 테이블인데
+현재 게시글에 테이블을 추가할 때 tag테이블에 해당 태그가 있으면 가져오고, 없으면 tag에 새로 태그를 생성해줘 post_tag는 post와 tag사이에 연결해주는 역할이야,
+해당 게시글에 해당 태그가 있는지 2개의 외래키를 사용해서, 그냥 tag만 있어도 되지만, 그렇게 하면 n:m으로 연결이 되는데, 그건 구현이 어려울 거같아서 테이블 2개로 쪼갠것
+
+파이어베이스 - 이메일인증은 정욱님
+나는
+db설계
+rest api 설계 
+멀티미디어 올리는것도
+크롤링
+crud
+
+제가 생각하는 다음주까지는
+기본 게시판까지 구성할 것 같아요.
+
+기존 db 접속
+docker exec -it maria-db mysql -u root -p
+계정 생성
+create user user@localhost identified by 'user';
+user 계정에 권한 부여
+grant all privileges on *.* to user@localhost identified by 'user' with grant option; 
+나가서 다시 user로 접속 후, 
+docker exec -it maria-db mysql -u user -p
+common 계정 생성
+create database common;
+use common;
+이 후에 테이블 생성
+
+properties는 
+id : user
+pass : user
+db경로 common으로 통일

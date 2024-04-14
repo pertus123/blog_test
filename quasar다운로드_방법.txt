@@ -1,0 +1,19 @@
+1. quasar 검색 (vs 코드에서)
+2. npm install -g @quasar/cli  설치
+3. quasar create happyhousefinal
+4
+- 1. 프로젝트 이름 설정 (자동완성되어있음) - happyhousefinal
+- 2. 프로덕트 이름 설정 - happyhouse
+- 3. 프로젝트 설명 설정 - ssafy happyhouse final project
+- 4. 생성한 사람 - 엔터
+- 5. css 프로페서 선택 - none
+- 6. 맨처음꺼 선택
+- 7. eslint, vuex, axios 스페이스바로 선택 후 엔터
+- 8. prettier선택
+- 9. use NPM선택
+5. quasar dev 로 실행
+6. 끝
+
+
+퀘이사에서 .env파일 사용하는 방법
+https://medium.com/carbono/using-env-file-in-quasar-apps-72b56909302f

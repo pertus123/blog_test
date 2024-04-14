@@ -1,0 +1,76 @@
+dto
+
+member
+long uid
+string email
+string password
+string name
+string introduce
+string profileImage
+// 이메일 체크 엔티티도?
+datetime create_date
+
+post
+long uid
+string title
+string email
+string content
+long like
+string 목차??
+datetime create_date
+
+comment
+string name
+string email
+datetime create_date
+string content
+
+임시 저장 tempPost
+string title
+string email
+datetime create_date
+string content
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+error는 실패 시, 특정 코드 반환으로 확인
+회원 관리
+명		http 메소드	API 명		전달 파라미터						반환값.
+로그인		get		login		string email, string password				회원 정보 토큰 발행
+회원가입		post		register		object request(email, password, name)	
+회원정보수정	post		updateInfo	object request(email, password, name, introduce, profileImage)
+개인정보가져오기	get		profileInfo	string email						member 정보들
+회원탈퇴		delete		deleteInfo
+
+post 관리
+명		http 메소드	API 명		전달 파라미터						반환값.
+리스트가져오기	get		searchPage	int sw(0,1...), string listString					리스트()
+상세 페이지	get		detailPage	long uid							object(post)
+글쓰기		post		writePage	object(post)
+글삭제		delete		deletePage	long uid
+글수정		post		updatePage	object(post)
+좋아요&안좋아요	post		likePage		int sw, long uid	
+나의 글 리스트 => 리스트 가져오기 목록에 포함.
+
+댓글
+명		http 메소드	API 명		전달 파라미터						반환값.
+댓글쓰기		post		writeComment	post object
+댓글보기		get		detailComment	post uid
+댓글수정?		post		updateComment	
+댓글삭제		delete		deleteComment
+
+
+임시저장
+명		http 메소드	API 명		전달 파라미터						반환값.
+임시저장하기	post		writeTemp
+불러오기		get		detailTemp
+게시글로저장	post		saveTemp
+임시글삭제	delete		deleteTemp
+
+
+
+
+
+
+
+

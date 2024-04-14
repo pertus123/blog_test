@@ -1,0 +1,84 @@
+DB 아이디 : user
+ password : user
+데이터 베이스 : common
+
+DROP TABLE IF EXISTS user;
+================================================
+CREATE TABLE member (
+  uid BIGINT NOT NULL auto_increment,
+  email varchar(100) DEFAULT NULL,
+  password varchar(100) DEFAULT NULL,
+  name varchar(200) DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+  introduce varchar(200) DEFAULT NULL,
+  profileimage varchar(200) DEFAULT NULL,
+
+  PRIMARY KEY (uid),
+  UNIQUE KEY user_idx_unique_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+================================================
+CREATE TABLE post(
+  pid BIGINT NOT NULL auto_increment,
+  title varchar(100) DEFAULT NULL,
+  email varchar(100) NOT NULL,
+  content varchar(5000) DEFAULT NULL,
+  likes int DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+
+  PRIMARY KEY (pid),
+FOREIGN KEY(email) REFERENCES member(email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+================================================
+CREATE TABLE temppost(
+  tid BIGINT NOT NULL auto_increment,
+  title varchar(100) DEFAULT NULL,
+  email varchar(100) NOT NULL,
+  content varchar(5000) DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+
+  PRIMARY KEY (tid),
+FOREIGN KEY(email) REFERENCES member(email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+================================================
+CREATE TABLE comment(
+  cid BIGINT NOT NULL auto_increment,
+  pid BIGINT NOT NULL,
+  email varchar(100) DEFAULT NULL,
+  content varchar(1000) DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+
+  PRIMARY KEY (cid),
+FOREIGN KEY(pid) REFERENCES post(pid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+================================================
+CREATE TABLE post_like(
+  like_id BIGINT NOT NULL auto_increment,
+  pid BIGINT NOT NULL,
+  uid BIGINT NOT NULL,
+  switch INT DEFAULT NULL,
+
+  PRIMARY KEY (like_id),
+FOREIGN KEY(pid) REFERENCES post(pid),
+FOREIGN KEY(uid) REFERENCES member(uid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+================================================
+CREATE TABLE tag(
+  tag_id BIGINT NOT NULL auto_increment,
+  name varchar(100) DEFAULT NULL,
+
+  PRIMARY KEY (tag_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+================================================
+CREATE TABLE post_tag(
+  post_tag_id BIGINT NOT NULL auto_increment,
+  pid BIGINT NOT NULL,
+  tag_id BIGINT NOT NULL,
+
+  PRIMARY KEY (post_tag_id),
+FOREIGN KEY(pid) REFERENCES post(pid),
+FOREIGN KEY(tag_id) REFERENCES tag(tag_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

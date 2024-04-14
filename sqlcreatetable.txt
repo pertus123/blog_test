@@ -1,0 +1,151 @@
+DROP TABLE IF EXISTS user;
+================================================
+CREATE TABLE member (
+  uid BIGINT NOT NULL auto_increment,
+  email varchar(100) DEFAULT NULL,
+  password varchar(100) DEFAULT NULL,
+  name varchar(200) DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+  introduce varchar(100) DEFAULT NULL,
+  profileimage varchar(200) DEFAULT NULL,
+
+  PRIMARY KEY (uid),
+  UNIQUE KEY user_idx_unique_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+================================================
+이거 X
+CREATE TABLE post(
+  uid BIGINT NOT NULL auto_increment,
+  title varchar(100) DEFAULT NULL,
+  email varchar(100) NOT NULL FOREIGN KEY REFERENCES member(uid),
+  content varchar(5000) DEFAULT NULL,
+  like BIGINT DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+
+  PRIMARY KEY (uid),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+이것 O
+CREATE TABLE post(
+  uid BIGINT NOT NULL auto_increment,
+  title varchar(100) DEFAULT NULL,
+  email varchar(100) NOT NULL,
+  content varchar(5000) DEFAULT NULL,
+  likes int DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+
+  PRIMARY KEY (uid),
+FOREIGN KEY(email) REFERENCES member(email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+================================================
+CREATE TABLE tempPost(
+  title varchar(100) DEFAULT NULL,
+  email varchar(100) DEFAULT NULL FOREIGN KEY REFERENCES member(uid),
+  content varchar(5000) DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+================================================
+CREATE TABLE comment(
+  uid BIGINT NOT NULL auto_increment FOREIGN KEY REFERENCES post(uid),
+  email varchar(100) DEFAULT NULL,
+  content varchar(1000) DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp(),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+
+
+
+
+
+
+
+
+=======================================================================
+course 관련 DB -> 이모티콘이 포함될 경우, varchar에서 에러! 참고하기 바람 -> db 설정 변경
+=======================================================================
+CREATE TABLE inflearn_total_list(
+itlid BIGINT NOT NULL auto_increment,
+  coursetype int DEFAULT NULL,
+  course varchar(200) DEFAULT NULL,
+  courseurl varchar(200) DEFAULT NULL,
+  imageurl varchar(500) DEFAULT NULL,
+  instructor varchar(200) DEFAULT NULL,
+PRIMARY KEY (itlid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+================================================
+CREATE TABLE user_course(
+  uid BIGINT NOT NULL,
+  gid BIGINT NOT NULL,
+FOREIGN KEY(gid) REFERENCES course_info(gid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+이거 course_list와 1:1 매핑
+================================================
+CREATE TABLE course_info(
+  gid BIGINT NOT NULL auto_increment,
+  coursetype int DEFAULT NULL,
+  course varchar(200) DEFAULT NULL,
+  courseurl varchar(200) DEFAULT NULL,
+  imageurl varchar(500) DEFAULT NULL,
+  instructor varchar(200) DEFAULT NULL,
+  PRIMARY KEY (gid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+================================================
+CREATE TABLE course_info_class(
+cicid BIGINT NOT NULL AUTO_INCREMENT,
+  gid BIGINT NOT NULL,
+  maincategory varchar(200) DEFAULT NULL,
+  middlecategory varchar(200) DEFAULT NULL,
+ PRIMARY KEY (cicid),
+FOREIGN KEY(gid) REFERENCES course_info(gid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+================================================
+CREATE TABLE course_list(
+  uid BIGINT NOT NULL,
+  gid BIGINT NOT NULL,
+  pid BIGINT NOT NULL,
+  maincategory varchar(200) DEFAULT NULL,
+  middlecategory varchar(200) DEFAULT NULL,
+FOREIGN KEY(pid) REFERENCES post(pid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+이거 user_cource 와 1:1, post와 1:1 매핑?
+
+여기 밑 사용 X
+---------------------------------------------------------------------------
+================================================
+CREATE TABLE course_post(
+  uid BIGINT NOT NULL,
+  gid BIGINT NOT NULL,
+  maincategory varchar(200) DEFAULT NULL,
+  middlecategory varchar(200) DEFAULT NULL,
+  email varchar(100) DEFAULT NULL,
+  content varchar(5000) DEFAULT NULL,
+  likes int DEFAULT NULL,
+  create_date datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+tag 관련 - 생각 중.
+=======================================================================
+CREATE TABLE post_tag(
+  uid BIGINT NOT NULL,
+  gid BIGINT NOT NULL,
+  maincategory varchar(200) DEFAULT NULL,
+  middlecategory varchar(200) DEFAULT NULL,
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+=======================================================================
+CREATE TABLE tag(
+  uid BIGINT NOT NULL,
+  gid BIGINT NOT NULL,
+  maincategory varchar(200) DEFAULT NULL,
+  middlecategory varchar(200) DEFAULT NULL,
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

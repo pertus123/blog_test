@@ -1,0 +1,60 @@
+젠킨스 공부
+db연동
+
+젠킨스 설정
+ssh -i "jenkins.pem" ubuntu@ec2-3-35-218-51.ap-northeast-2.compute.amazonaws.com
+
+
+접속 주소 : 3.35.218.51
+http://3.35.218.51:8081/
+jenkinstest2
+
+application server에서 sh 실행
+지금 수동으로 빌더 누름
+웹훅 적용해서 해야할 듯
+가끔 sh 실행 안되면 auto~~.sh 쳐서 하기
+고생했다 ㅠ
+
+jekins
+dadf68ae4e304eb69b9462c3c92b6c07
+셰정명 admin
+암호 admin
+이메일 opert1564@naver.com
+
+기본 jekins password : dadf68ae4e304eb69b9462c3c92b6c07
+tomcat을 구동할 tomcat User를 생성해준다.
+이때 암호를 사용하는것을 권장한다.
+id : tomcat
+password tomcat
+
+/opt/tomcat/apache-tomcat-8.5.59/backend/target/			// application server
+/home/ubuntu/commonProject/s04p12b103/[quasar] frontend		// 이것도 applicagtion server
+
+
+
+aws 요금
+https://console.aws.amazon.com/billing/home?nc2=h_m_bc#/
+
+
+jenkins
+https://pjh3749.tistory.com/261 - 도커
+https://victorydntmd.tistory.com/230
+https://kykkyn2.tistory.com/72
+https://yookeun.github.io/tools/2018/04/14/jenkins-remote/
+https://rerewww.github.io/jenkins/jenkins-guide-03/
+https://dev-joo.tistory.com/28
+// 셋팅
+https://velog.io/@junho5336/jenkins%EB%A1%9C-%EB%B9%8C%EB%93%9C-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0#%EC%84%9C%EB%A1%A0
+
+https://goddaehee.tistory.com/259
+https://kamang-it.tistory.com/entry/Jenkinsssh%EC%9D%B4%EC%9A%A9%ED%95%B4%EC%84%9C-%EB%B9%8C%EB%93%9C%EB%90%98%EA%B3%A0-%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8-%EC%8B%A4%ED%96%89%ED%95%98%EA%B8%B04
+https://blog.jiniworld.me/25
+
+/opt/tomcat/apache-tomcat-8.5.59/backend/target/
+
+/home/ubuntu/commonProject/s04p12b103/[quasar] frontend
+
+1,2,3,4
+4팀 교육
+1팀 음식
+2팀 대현
